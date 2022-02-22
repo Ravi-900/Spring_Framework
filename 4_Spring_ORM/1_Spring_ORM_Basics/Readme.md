@@ -250,3 +250,263 @@
 			factory.close();
 		}
 ```
+
+## Querying Objects - Hibernate Query Language (HQL)
+
+    > Query language for retrieving objects
+    > Similar in nature to SQL
+        - where, like, order by, join, in, etc...
+    
+    Retrieving all Students
+```Java
+        List<Student> theStudents = session.createQuery("from Student").list();
+```
+
+    Retrieving Students: lastName = 'Kumawat'
+```Java
+        List<Student> theStudents = session.createQuery("from Student s where s.lastName='kumawat'").list();
+``` 
+
+    Retrieving Students using OR predicate
+```Java
+        List<Student> theStudents = session.createQuery("from Student s where s.lastName='kumawat'"+"OR s.firstName='Ravi'").list();
+``` 
+
+    Retrieving Students using LIKE predicate
+```Java
+        List<Student> theStudents = session.createQuery("from Student s where"+" s.email LIKE '%gmail.com'").list();
+``` 
+    Note: Use Java property names everywhere in query
+
+    Example:-
+```Java
+        public class QueryStudentDemo {
+
+            public static void main(String[] args) {
+                
+                // create session factory
+                SessionFactory factory = new Configuration()
+                        .configure("hibernate.cfg.xml")
+                        .addAnnotatedClass(Student.class)
+                        .buildSessionFactory();
+                
+                // create session
+                Session session = factory.getCurrentSession();
+                
+                try {			
+                    // start a transaction
+                    session.beginTransaction();
+                    
+                    // query students
+                    // Retrieving all Students
+                    List<Student> theStudents = session.createQuery("from Student").list();
+                    
+                    //display the students
+                    System.out.println("\nDisplaying all Student details : ");
+                    DisplayStudent(theStudents);
+                    
+                    // Retrieving Students: lastName = 'Kumawat'
+                    theStudents = session.createQuery("from Student s where s.lastName='kumawat'").list();
+                    System.out.println("\nDisplaying student names ending with 'Kumawat' : ");
+                    DisplayStudent(theStudents);
+                    
+                    // Retrieving Students using OR predicate
+                    theStudents = session.createQuery("from Student s where s.lastName='kumawat'"+"OR s.firstName='Spoorthi'").list();
+                    System.out.println("\nDisplaying student names ending with 'Kumawat' or starting 'Spoorthi' : ");
+                    DisplayStudent(theStudents);
+
+                    // Retrieving Students using LIKE predicate
+                    theStudents = session.createQuery("from Student s where"+" s.email LIKE '%gmail.com'").list();
+                    System.out.println("\nDisplaying student Data whose email ends with 'gmail.com': ");
+                    DisplayStudent(theStudents);
+                    
+                    
+                    // commit transaction
+                    session.getTransaction().commit();
+                    
+                    System.out.println("Done!");
+                }
+                finally {
+                    factory.close();
+                }
+            }
+
+            private static void DisplayStudent(List<Student> theStudents) {
+                for(Student tempStudent : theStudents) {
+                    System.out.println(tempStudent);
+                }
+            }
+
+        }
+``` 
+
+## Updating Objects(s) - using hibernate
+
+```Java
+        int studentId = 1;
+        Student myStudent = session.get(Student.class,studentId);
+
+        // update first name to "scooby"
+        myStudent.seFirstName("Scooby");
+
+        // commit the transaction
+        session.getTransaction().commit();
+```
+
+    Update email for all students
+```Java
+        session.createQuery("update Student set email='foo@gmail.com'").executeUpdate();
+```
+    Example: 
+```Java
+        public class UpdateStudentDemo {
+
+            public static void main(String[] args) {
+                
+                // create session factory
+                SessionFactory factory = new Configuration()
+                        .configure("hibernate.cfg.xml")
+                        .addAnnotatedClass(Student.class)
+                        .buildSessionFactory();
+                
+                // create session
+                Session session = factory.getCurrentSession();
+                
+                try {
+                    int studentId = 16;
+                    
+                    // start a transaction
+                    session.beginTransaction();
+                    
+                    Student myStudent = session.get(Student.class, studentId);
+                    
+                    // displaying student data before update
+                    System.out.println("\nbefore update: "+myStudent); 
+                    
+                    // update first name to "Scooby"
+                    myStudent.setFirstName("Scooby");
+                    
+                    // displaying student data after update
+                    System.out.println("\nafter update: "+myStudent); 
+                    
+                    // commit transaction
+                    session.getTransaction().commit();
+                    
+                    session = factory.getCurrentSession();
+                    // start a transaction
+                    session.beginTransaction();
+                    
+                    // before all student details
+                    System.out.println("\nbefore all student info : ");
+                    List<Student> theStudents = session.createQuery("from Student").list();
+                    DisplayStudent(theStudents);
+                    
+                    // Update email for all students
+                    session.createQuery("update Student set email='foo@gmail.com'").executeUpdate();
+                    
+                    // after all student details
+                    System.out.println("\nafter all student info : ");
+                    theStudents = session.createQuery("from Student").list();
+                    DisplayStudent(theStudents);			
+                    
+                    // commit transaction
+                    session.getTransaction().commit();
+            
+                    System.out.println("Done!");
+                }
+                finally {
+                    factory.close();
+                }
+            }
+            private static void DisplayStudent(List<Student> theStudents) {
+                for(Student tempStudent : theStudents) {
+                    System.out.println(tempStudent);
+                }
+            }
+        }
+```
+
+## Deleting objects - using hibernate
+```Java
+        int studentId = 1;
+        Student myStudent = session.get(Student.class,studentId);
+
+        // delete the student
+        session.delete(myStudent)
+
+        // commit the transaction
+        session.getTransaction().commit();
+```
+
+    Example:-
+```Java
+        public class DeleteStudentDemo {
+
+            public static void main(String[] args) {
+                
+                // create session factory
+                SessionFactory factory = new Configuration()
+                        .configure("hibernate.cfg.xml")
+                        .addAnnotatedClass(Student.class)
+                        .buildSessionFactory();
+                
+                // create session
+                Session session = factory.getCurrentSession();
+                
+                try {
+                    // start a transaction
+                    session.beginTransaction();
+                    
+                    // before all student details
+                    System.out.println("\nbefore all student info : ");
+                    List<Student> theStudents = session.createQuery("from Student").list();
+                    DisplayStudent(theStudents);
+                    
+                    int studentId=17;
+                    Student myStudent = session.get(Student.class, studentId);
+                    
+                    // delete the student
+                    session.delete(myStudent);
+                    /**
+                    * or we can use following statement
+                    * session.createQuery("delete from table where id=2").executeUpdate();
+                    */
+                    
+                    // after all student details
+                    System.out.println("\nafter all student info : ");
+                    theStudents = session.createQuery("from Student").list();
+                    DisplayStudent(theStudents);		
+                    
+                    // commit transaction
+                    session.getTransaction().commit();
+                    
+                    
+                    // adding new Code from here
+                    session = factory.getCurrentSession();
+                    
+                    // start a transaction
+                    session.beginTransaction();
+                    
+                    // deleting students whose last name is kumawat
+                    session.createQuery("delete from Student where lastName='kumawat'").executeUpdate();
+                    
+                    // after all student details
+                    System.out.println("\nafter all student info : ");
+                    theStudents = session.createQuery("from Student").list();
+                    DisplayStudent(theStudents);	
+                    
+                    // commit transaction
+                    session.getTransaction().commit();			
+                    
+                }
+                finally {
+                    factory.close();
+                }
+            }
+            private static void DisplayStudent(List<Student> theStudents) {
+                for(Student tempStudent : theStudents) {
+                    System.out.println(tempStudent);
+                }
+            }
+        }
+```
